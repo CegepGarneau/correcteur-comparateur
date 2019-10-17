@@ -15,7 +15,7 @@
             <ColumnDefinition Width="721*"/>
         </Grid.ColumnDefinitions>
         <Button x:Name="_btnComparer" Content="Comparer" HorizontalAlignment="Left" Margin="-4,0,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click" Height="20"/>
-        <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Stretch" x:Name="_Log" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Visible" Grid.Column="1" IsEnabled="False"/>
+        <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Stretch" x:Name="_Log" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Visible" Grid.Column="1" IsReadOnly="True"/>
         <Grid HorizontalAlignment="Left" Height="13" Margin="26,37,0,0" VerticalAlignment="Top" Width="10"/>
         <ProgressBar x:Name="_Progression" Grid.Column="1" HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Hidden"/>
 

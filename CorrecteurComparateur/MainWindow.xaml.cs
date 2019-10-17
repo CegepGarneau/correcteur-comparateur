@@ -84,7 +84,8 @@ namespace CorrecteurComparateur
             Comparateurs.ComparateurAccess comparateur =
                 new Comparateurs.ComparateurAccess()
                 {
-                    URIAttendu = configAccess.URIAttendu
+                    URIAttendu   = configAccess.URIAttendu,
+                    URIAComparer = configAccess.URIAComparer
                 };
             e.Result = comparateur.Comparer(worker, e);
         }
@@ -117,7 +118,6 @@ namespace CorrecteurComparateur
             }
 
             // Mettre le UI à jour
-            this._Progression.Value = 1;
             this._btnComparer.IsEnabled = true;
         }
 

@@ -1,0 +1,6 @@
+{
+    "ComparateurAccess": {
+        "URIAttendu": "chemin vers l'original",
+        "URIAComparer": "chemin vers le document à comparer"
+    }
+}

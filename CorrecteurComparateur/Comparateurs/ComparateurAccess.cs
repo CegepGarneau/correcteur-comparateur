@@ -19,8 +19,9 @@ namespace CorrecteurComparateur.Comparateurs
     /// </summary>
     public class ComparateurAccess
     {
-        public string URIAttendu { get; set; }
+        private const int FACTEUR_TABLE = 100;
 
+        public string URIAttendu { get; set; }
         public string URIAComparer { get; set; }
 
         private int _progression       = 0;
@@ -45,17 +46,18 @@ namespace CorrecteurComparateur.Comparateurs
         {
             this._worker = worker;
 
-            Access.Application access = null;
-            worker.ReportProgress(0, "Démarrage");
+            Access.Application appAttendue  = null;
+            Access.Application appAComparer = null;
+
+            RapporterProgression("Démarrage");
 
             try
             {
-                access = new Access.Application();
-                RapporterProgression("Access démarré");
+                appAttendue = OuvrirBd(URIAttendu);
+                appAComparer = OuvrirBd(URIAComparer);
+                RapporterProgression("Bds ouvertes");
 
-                access.OpenCurrentDatabase(URIAttendu, false, null);
-                RapporterProgression("Bd ouverte");
-                RapporterProgression("Lecture des tables : " + access.CurrentData.AllTables.Count);
+                ComparerTables(appAttendue, appAComparer);
             }
             catch (Exception exp)
             {
@@ -63,15 +65,77 @@ namespace CorrecteurComparateur.Comparateurs
             }
             finally
             {
-                if (access != null)
+                if (appAttendue != null)
                 {
-                    access.Quit(Access.AcQuitOption.acQuitSaveNone);
-                    Marshal.ReleaseComObject(access);
-                    access = null;
-                    RapporterProgression("Access fermé");
+                    appAttendue.Quit(Access.AcQuitOption.acQuitSaveNone);
+                    Marshal.ReleaseComObject(appAttendue);
+                    appAttendue = null;
+                    RapporterProgression("Bd attendue fermée");
+                }
+                if (appAComparer != null)
+                {
+                    appAComparer.Quit(Access.AcQuitOption.acQuitSaveNone);
+                    Marshal.ReleaseComObject(appAComparer);
+                    appAComparer = null;
+                    RapporterProgression("Bd à comparer fermée");
                 }
             }
             return 0;
+        }
+
+        /// <summary>
+        /// Pour ouvrir une bd
+        /// </summary>
+        /// <param name="uri">Chemin pour la bd</param>
+        /// <returns>Access ouvert pour la bd demandée</returns>
+        private Access.Application OuvrirBd(string uri)
+        {
+            RapporterProgression("Ouverture de " + uri);
+
+            Access.Application app = null;
+            app = new Access.Application();
+            
+            app.OpenCurrentDatabase(uri, false, null);
+
+            return app;
+        }
+
+        /// <summary>
+        /// Pour comparer toutes les tables
+        /// </summary>
+        private void ComparerTables(Access.Application appAttendue, Access.Application appAComparer)
+        {
+            RapporterProgression("Lecture des tables");
+            _progressionTotale = appAttendue.CurrentData.AllTables.Count;
+            List<Access.AccessObject> tables = new List<Access.AccessObject>();
+
+            // Trouver les vraies tables et mettre de côté les tables internes d'Access (commançant par "MS")
+            foreach (Access.AccessObject table in appAttendue.CurrentData.AllTables)
+            {
+                if (!table.Name.StartsWith("MS"))
+                {
+                    tables.Add(table);
+                    RapporterProgression("Table : " + table.Name + " ");
+                }
+            }
+            RapporterProgression(tables.Count + " tables à comparer");
+            _progressionTotale = tables.Count * FACTEUR_TABLE;
+
+            foreach (Access.AccessObject tableAttendue in tables)
+            {
+                Access.AccessObject tableAComparer = appAComparer.CurrentData.AllTables[tableAttendue.Name];
+                ComparerTables(tableAttendue, tableAComparer);
+                _progression += FACTEUR_TABLE;
+            }
+        }
+
+        /// <summary>
+        /// Pour comparer deux tables
+        /// </summary>
+        private void ComparerTables(Access.AccessObject tableAttendue, Access.AccessObject tableAComparer)
+        {
+            RapporterProgression("Table " + tableAttendue.Name + " trouvée : " + (tableAComparer != null));
+
         }
     }
 }
