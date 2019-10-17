@@ -9,47 +9,57 @@ using System.Diagnostics;
 using System.Reflection;
 using Access = Microsoft.Office.Interop.Access;
 using System.Windows;
+using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace CorrecteurComparateur.Comparateurs
 {
-    public abstract class AbsComparaison
-    {
-        public Object Attendu { get; set; }
-        public Object AComparer { get; set; }
-        public decimal NbPoints { get; set; }
-        public String Titre { get; set; }
-
-        public abstract decimal Comparer();
-    }
-
-    public interface ILoggueur
-    {
-        void Log(string message);
-    }
-
+    /// <summary>
+    /// Permet de comparer deux bases de données Access
+    /// </summary>
     public class ComparateurAccess
     {
-        public static string GetNom()
-        {
-            return "Comparateur Access";
-        }
-
         public string URIAttendu { get; set; }
 
         public string URIAComparer { get; set; }
 
-        public decimal Comparer(ILoggueur loggueur)
+        private int _progression       = 0;
+        private int _progressionTotale = 100;
+        private BackgroundWorker _worker = null;
+
+        /// <summary>
+        /// Pour rapporter la progression
+        /// </summary>
+        private void RapporterProgression(string message)
         {
+            _worker.ReportProgress(_progression * 100 / _progressionTotale, message);
+        }
+
+        /// <summary>
+        /// Compare et retourne une note pour la comparaison de URIAttendu avec URIAComparer
+        /// </summary>
+        /// <param name="worker">Tâche en arrière plan</param>
+        /// <param name="e">Événement pour interagir avec la tâche</param>
+        /// <returns>Une note</returns>
+        public decimal Comparer(BackgroundWorker worker, DoWorkEventArgs e)
+        {
+            this._worker = worker;
+
             Access.Application access = null;
+            worker.ReportProgress(0, "Démarrage");
+
             try
             {
                 access = new Access.Application();
+                RapporterProgression("Access démarré");
+
                 access.OpenCurrentDatabase(URIAttendu, false, null);
-                Console.WriteLine(access.CurrentData.AllTables.Count);
+                RapporterProgression("Bd ouverte");
+                RapporterProgression("Lecture des tables : " + access.CurrentData.AllTables.Count);
             }
-            catch (Exception e)
+            catch (Exception exp)
             {
-                MessageBox.Show(e.Message, "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                RapporterProgression(exp.Message);
             }
             finally
             {
@@ -58,6 +68,7 @@ namespace CorrecteurComparateur.Comparateurs
                     access.Quit(Access.AcQuitOption.acQuitSaveNone);
                     Marshal.ReleaseComObject(access);
                     access = null;
+                    RapporterProgression("Access fermé");
                 }
             }
             return 0;
