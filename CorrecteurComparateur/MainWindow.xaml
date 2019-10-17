@@ -5,8 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CorrecteurComparateur"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Correcteur Comparateur" Height="450" Width="800">
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="71*"/>
+            <ColumnDefinition Width="721*"/>
+        </Grid.ColumnDefinitions>
+        <ComboBox x:Name="_ChoixComparateur" Grid.Column="1" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="120"/>
+
     </Grid>
 </Window>
