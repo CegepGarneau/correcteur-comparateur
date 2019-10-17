@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,7 +22,7 @@ namespace CorrecteurComparateur
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Object _config = null;
+        private JObject _config = null;
 
         public MainWindow()
         {
@@ -31,17 +32,18 @@ namespace CorrecteurComparateur
 
         private void ChargerConfig()
         {
-            string fichier = CorrecteurComparateur.Properties.Resources.ConfigFile;
-            if (!File.Exists(fichier))
+            string cheminConfig = CorrecteurComparateur.Properties.Resources.ConfigFile;
+            if (!File.Exists(cheminConfig))
             {
                 return;
             }
-            this._config = JsonConvert.DeserializeObject(File.ReadAllText(fichier));
+            this._config = JObject.Parse(File.ReadAllText(cheminConfig));
 
-            Comparateurs.ComparateurAccess comparateur = 
-                new Comparateurs.ComparateurAccess() 
-                { 
-                    URIAttendu = "C:\\Users\\nrichard\\Google Drive\\Cours\\2019-A\\420-533\\TP\\TP 1\\TP 1 - Requetes.accdb" 
+            dynamic configAccess = _config["ComparateurAccess"];
+            Comparateurs.ComparateurAccess comparateur =
+                new Comparateurs.ComparateurAccess()
+                {
+                    URIAttendu = configAccess.URIAttendu
                 };
             comparateur.Comparer(null);
         }
