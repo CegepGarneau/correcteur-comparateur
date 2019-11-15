@@ -127,6 +127,7 @@ namespace CorrecteurComparateur
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             this._btnComparer.IsEnabled = false;
+            this._Log.Clear();
             this._worker.RunWorkerAsync();
         }
     }
